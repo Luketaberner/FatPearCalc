@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project price estimator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+   
+      :root{
+        --bg:#F9BBD6; --ink:#2C2C2C; --muted:#5b4350; --line:rgba(44,44,44,.28);
+        --accent:#2C2C2C; --accent-soft:#EAE6E1; --btn:#EAE6E1;
+        --font:"Cal Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+      }
+      *{font-weight:400!important}
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.5}
+      .wrap{max-width:760px;margin:0 auto;padding:24px 20px 32px}
+      h1{font-size:1.6rem;margin:0 0 4px;letter-spacing:-.01em}
+      .sub{color:var(--muted);margin:0 0 28px;font-size:.95rem}
+      .row{margin-bottom:26px}
+      .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+      .top label{font-weight:600}
+      .val{font-variant-numeric:tabular-nums;color:var(--accent);font-weight:600}
+      .hint{color:var(--muted);font-size:.85rem;margin:2px 0 8px}
+      input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;outline:none;cursor:pointer;
+        background:linear-gradient(to right,var(--accent) var(--p,0%),var(--line) var(--p,0%))}
+      input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--bg);border:3px solid var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+      input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--bg);border:3px solid var(--accent)}
+      input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:6px}
+      .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+      .opts button{font:inherit;color:var(--ink);background:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer}
+      .opts button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+      .opts button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+      .result{border-top:2px solid var(--ink);padding-top:20px;margin-top:8px}
+      .result .lbl{color:var(--muted);font-size:.9rem}
+      .price{font-size:clamp(2.2rem,8vw,3.4rem);font-weight:700;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+      .break{display:grid;grid-template-columns:1fr auto;gap:2px 16px;max-width:320px;margin-top:12px;color:var(--muted);font-size:.9rem;font-variant-numeric:tabular-nums}
+      .break span:nth-child(even){text-align:right}
+      .note{color:var(--muted);font-size:.85rem;margin:10px 0 18px;max-width:60ch}
+      .cta{display:inline-block;background:var(--btn);color:var(--ink);border:2px solid var(--ink);text-decoration:none;padding:12px 22px;border-radius:6px}
+      .cta:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Estimate the cost of your project right here!</h1>
+      <p class="sub">
+        Drag the sliders to describe what you need, and you'll get a ballpark price
+        straight away.
+      </p>
+
+      <div class="row">
+        <div class="top"><label>Not sure where to start?</label></div>
+        <div class="hint">
+          Pick the project closest to yours and we'll set the sliders for you.
+          You can change anything afterwards.
+        </div>
+        <div
+          class="opts"
+          id="presets"
+          role="group"
+          aria-label="Typical projects"
+        ></div>
+      </div>
+
+      <div class="row">
+        <div class="top">
+          <label for="length">Finished video length</label
+          ><span class="val" id="lengthV"></span>
+        </div>
+        <div class="hint">The runtime of the final film.</div>
+        <input
+          type="range"
+          id="length"
+          min="0.5"
+          max="10"
+          step="0.5"
+          value="2"
+        />
+      </div>
+
+      <div class="row">
+        <div class="top">
+          <label for="days">Shoot days</label
+          ><span class="val" id="daysV"></span>
+        </div>
+        <div class="hint" id="daysH"></div>
+        <input type="range" id="days" min="0.5" max="5" step="0.5" value="1" />
+      </div>
+
+      <div class="row">
+        <div class="top">
+          <label for="crew">People on set</label
+          ><span class="val" id="crewV"></span>
+        </div>
+        <div class="hint" id="crewH"></div>
+        <input type="range" id="crew" min="1" max="3" step="1" value="2" />
+      </div>
+
+      <div class="row">
+        <div class="top"><label>Graphics and finishing</label></div>
+        <div
+          class="opts"
+          id="gfx"
+          role="group"
+          aria-label="Graphics and finishing"
+        ></div>
+      </div>
+
+      <div class="row">
+        <div class="top"><label>Extras</label></div>
+        <div class="opts" id="extras" role="group" aria-label="Extras"></div>
+      </div>
+
+      <div class="row">
+        <div class="top">
+          <label>How long is the Travel to the shoot? (From Sheffield City Centre)</label>
+        </div>
+        <div class="hint">
+          Roughly how long it takes us to get to the location? Travel time and costs are
+          included in your price.
+        </div>
+        <div
+          class="opts"
+          id="travel"
+          role="group"
+          aria-label="Distance to the shoot"
+        ></div>
+      </div>
+
+      <div class="result" aria-live="polite">
+        <div class="lbl" id="priceLbl">Estimated price</div>
+        <div class="price" id="price"></div>
+        <div class="break">
+          <span>Before VAT</span><span id="net"></span>
+          <span id="vatLbl">VAT</span><span id="vat"></span>
+        </div>
+        <p class="note">
+          This is a guide based on our past projects, not a quote. The final
+          figure depends on the details of your project.
+        </p>
+        <p class="note">
+          If you still dont know what you need, Drop us a message and explain what it is you want. We'll work out the right crew, days and budget with you.
+        </p>
+      </div>
+      <a class="cta" href="/contact" target="_top">Get an exact quote</a>
+    </div>
+
+    <script>
+     
+    
+var CONFIG = {
+  hourlyRate: 15,          // £ per person per hour
+  hoursPerShootDay: 8,     // hours per person on a shoot day
+  editHoursPerMinute: 6,   // editing hours per finished minute
+  prepHoursBase: 4,        // planning time on every job
+  prepHoursPerDay: 2,      // extra planning per shoot day
+  vatPercent: 0,           // VAT added on top. 
+  rangePercent: 10,        // price range shown either side of the labour cost (%)
+  roundTo: 10,             // round prices to nearest £
+  graphics: [              // extra hours per finished minute
+    {name:"None",   perMinute:0},
+    {name:"Simple (titles, captions)", perMinute:2},
+    {name:"Full graphics",     perMinute:8}
+  ],
+  extras: [                // flat extra hours
+    {name:"Cliped up for social media ", hours:4},
+    {name:"Extra round of edits",   hours:3}
+  ],
+  travel: [                // per shoot day: round-trip hours per person, and fuel/parking £
+    {name:"Up to 1 hour away",     hours:2, cost:15},
+    {name:"1 to 2 hours away",     hours:4, cost:30},
+  ],
+  presets: [               // typical projects; graphics: 0 none, 1 Simple, 2 full
+   {name:"Event coverage",            length:3,   days:1,   crew:1, graphics:0},
+   {name:"Promo or brand video",      length:2,   days:1,   crew:2, graphics:1},
+    {name:"Music video",               length:4,   days:2,   crew:3, graphics:1} 
+  ]
+};
+
+var $ = function(id){return document.getElementById(id)};
+var state = {gfx:0, travel:0, extras:{}};
+
+function pill(container, label, pressed, onClick){
+  var b = document.createElement("button");
+  b.type = "button"; b.textContent = label;
+  b.setAttribute("aria-pressed", pressed);
+  b.onclick = onClick;
+  container.appendChild(b);
+  return b;
+}
+
+CONFIG.graphics.forEach(function(g,i){
+  pill($("gfx"), g.name, i===0, function(){
+    state.gfx = i;
+    Array.prototype.forEach.call($("gfx").children, function(btn,j){btn.setAttribute("aria-pressed", j===i)});
+    update();
+  });
+});
+CONFIG.travel.forEach(function(t,i){
+  pill($("travel"), t.name, i===0, function(){
+    state.travel = i;
+    Array.prototype.forEach.call($("travel").children, function(btn,j){btn.setAttribute("aria-pressed", j===i)});
+    update();
+  });
+});
+CONFIG.extras.forEach(function(x,i){
+  pill($("extras"), x.name, false, function(e){
+    state.extras[i] = !state.extras[i];
+    e.currentTarget.setAttribute("aria-pressed", !!state.extras[i]);
+    update();
+  });
+});
+
+CONFIG.presets.forEach(function(p,i){
+  pill($("presets"), p.name, false, function(){
+    $("length").value = p.length;
+    $("days").value = p.days;
+    $("crew").value = p.crew;
+    state.gfx = p.graphics;
+    Array.prototype.forEach.call($("gfx").children, function(btn,j){btn.setAttribute("aria-pressed", j===p.graphics)});
+    Array.prototype.forEach.call($("presets").children, function(btn,j){btn.setAttribute("aria-pressed", j===i)});
+    update();
+  });
+});
+
+function daysHint(d){
+  if(d <= 0.5) return "Half a day: a quick shoot at a single location.";
+  if(d <= 1) return "One day: a few set-ups at one or two locations.";
+  if(d <= 3) return "Several locations or scenes.";
+  return "A bigger production with lots to capture.";
+}
+function crewHint(c){
+  if(c === 1) return "One filmmaker: good for simple, relaxed shoots.";
+  if(c === 2) return "Camera and sound, or a second camera for extra angles.";
+  if(c === 3) return "Adds lighting for a more  look.";
+}
+
+function gbp(n){return "£" + Math.round(n).toLocaleString("en-GB")}
+function snap(n){return Math.round(n / CONFIG.roundTo) * CONFIG.roundTo}
+
+function update(){
+  var len = +$("length").value, days = +$("days").value, crew = +$("crew").value;
+  $("lengthV").textContent = len + (len===1 ? " minute" : " minutes");
+  $("daysV").textContent = days + (days===1 ? " day" : " days");
+  $("crewV").textContent = crew + (crew===1 ? " person" : " people");
+  $("daysH").textContent = daysHint(days);
+  $("crewH").textContent = crewHint(crew);
+  ["length","days","crew"].forEach(function(id){
+    var el = $(id), p = (el.value - el.min) / (el.max - el.min) * 100;
+    el.style.setProperty("--p", p + "%");
+  });
+
+  var shootHours = days * CONFIG.hoursPerShootDay * crew;
+  var prepHours = CONFIG.prepHoursBase + days * CONFIG.prepHoursPerDay;
+  var editHours = len * CONFIG.editHoursPerMinute;
+  var gfxHours = len * CONFIG.graphics[state.gfx].perMinute;
+  var extraHours = 0;
+  CONFIG.extras.forEach(function(x,i){ if(state.extras[i]) extraHours += x.hours });
+
+  var trips = Math.ceil(days);
+  var tr = CONFIG.travel[state.travel];
+  var travelHours = trips * crew * tr.hours;
+  var vc = trips * tr.cost;
+  var total = (shootHours + prepHours + editHours + gfxHours + extraHours + travelHours) * CONFIG.hourlyRate;
+  var netLo = snap(total * (1 - CONFIG.rangePercent/100) + vc);
+  var netHi = snap(total * (1 + CONFIG.rangePercent/100) + vc);
+  var vr = CONFIG.vatPercent / 100;
+  var vatLo = netLo * vr, vatHi = netHi * vr;
+  $("price").textContent = gbp(netLo + vatLo) + " – " + gbp(netHi + vatHi);
+  $("net").textContent = gbp(netLo) + " – " + gbp(netHi);
+  $("vatLbl").textContent = "VAT (" + CONFIG.vatPercent + "%)";
+  $("vat").textContent = gbp(vatLo) + " – " + gbp(vatHi);
+  var hasVat = CONFIG.vatPercent > 0;
+  document.querySelector(".break").style.display = hasVat ? "" : "none";
+  $("priceLbl").textContent = hasVat ? "Estimated price including VAT" : "Estimated price";
+}
+
+["length","days","crew"].forEach(function(id){
+  $(id).addEventListener("input", function(){
+    Array.prototype.forEach.call($("presets").children, function(btn){btn.setAttribute("aria-pressed", false)});
+    update();
+  });
+});
+update();
+    </script>
+  </body>
+</html>
